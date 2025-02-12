@@ -1,0 +1,41 @@
+#install and export PATH
+export PATH=$PWD/bowtie2-2.5.1-linux-x86_64:$PATH
+bowtie2 --version
+
+
+#create or change BCref file as below: 
+#    53931_81120@B06$MARCH1	AATGAGATGCCCACTATTACGGAAAGCTCA to 
+#    >53931_81120@B06$MARCH1
+#    AATGAGATGCCCACTATTACGGAAAGCTCA
+# and save the file as my_sequences.fasta
+
+#Alternatively you can do it by runnign following command
+cd /temp_work/ch250798       #where your fasta file is
+awk '{print $1 "\n" $2}' my_sequences.fasta > my_sequences_fixed.fasta
+head my_sequences.fasta 
+#if it is in two lines as instructed before: then delete my_sequences.fasta file and rename my_sequences_fixed.fasta to my_sequences.fasta
+
+#This will create following files: my_sequences_index.*.bt2
+
+#Aligning Reads with Bowtie2
+bowtie2 -x my_sequences_index -U reads.fastq -S output.sam
+
+#if you have R1 & R2 FASTQ files
+bowtie2 -x my_sequences_index -1 reads_R1.fastq -2 reads_R2.fastq -S output.sam
+
+#Post-alignment: Counting Features
+featureCounts -T 4 -a annotation.gtf -o counts.txt output.sam
+#-T 4: Uses 4 threads (adjust based on your system).
+#-a annotation.gtf: Needs a GTF annotation file (if available).
+#-o counts.txt: Saves the output count table.
+
+#HTSeq-Count
+htseq-count -f sam -s no output.sam annotation.gtf > counts.txt
+#-f sam: Specifies SAM format.
+#-s no: If your data is not strand-specific
+
+#Final Step: Analyze Expression
+#Now that you have a counts.txt file, you can:
+#Use R (Seurat, DESeq2, EdgeR) to analyze gene expression.
+#Convert the output to a CSV for Excel (awk '{print $1","$2}' counts.txt > counts.csv).
+
