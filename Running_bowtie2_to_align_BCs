@@ -21,7 +21,12 @@ head my_sequences.fasta
 bowtie2 -x my_sequences_index -U reads.fastq -S output.sam
 
 #if you have R1 & R2 FASTQ files
-bowtie2 -x my_sequences_index -1 reads_R1.fastq -2 reads_R2.fastq -S output.sam
+bowtie2 -x my_sequences_index \
+    -1 24235FL-05-02V1-01_S1_L001_R1_001.fastq.gz \
+    -2 24235FL-05-02V1-01_S1_L001_R2_001.fastq.gz \
+    --very-sensitive-local -S L1.sam
+
+Repeat this for all the files
 
 #Post-alignment: Counting Features
 featureCounts -T 4 -a annotation.gtf -o counts.txt output.sam
